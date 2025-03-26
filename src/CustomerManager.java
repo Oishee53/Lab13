@@ -82,7 +82,13 @@ public class CustomerManager {
         }
     }
 
+    void addNewTicketToNumOfTicketsBookedByUser(int numOfTicket){
+        this.numOfTicketsBookedByUser.add(numOfTicket);
+    }
 
+    void removeNewTicketToNumOfTicketsBookedByUser(int index){
+        this.numOfTicketsBookedByUser.remove(index);
+    }
     public void deleteUser(String ID) {
         boolean isFound = false;
         Iterator<Customer> iterator = customerCollection.iterator();

@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class User {
-    static CustomerManager customerManager;
-    FlightManager flightManager;
 
     // ************************************************************ Fields
     // ************************************************************
@@ -33,6 +31,7 @@ public class User {
         FlightReservation bookingAndReserving = new FlightReservation();
         Customer c1 = new Customer();
         f1.flightScheduler();
+        CustomerManager customerManager = new CustomerManager(c1);
         Scanner read = new Scanner(System.in);
 
 
@@ -78,7 +77,7 @@ public class User {
                     System.out.println(
                             "You've standard/default privileges to access the data... You can just view customers data..."
                                     + "Can't perform any actions on them....");
-                    c1.customerManager.displayCustomersData(true);
+                    customerManager.displayCustomersData(true);
                 } else {
                     System.out.printf(
                             "%-20sLogged in Successfully as \"%s\"..... For further Proceedings, enter a value from below....",
@@ -108,18 +107,19 @@ public class User {
                         /* If 1 is entered by the privileged user, then add a new customer...... */
                         if (desiredOption == 1) {
                             Customer customer = readCustomerData();
-                            c1.customerManager.addNewCustomer(customer);
+
+                            customerManager.addNewCustomer(customer);
                         } else if (desiredOption == 2) {
                             /*
                              * If 2 is entered by the privileged user, then call the search method of the
                              * Customer class
                              */
 
-                            c1.customerManager.displayCustomersData(false);
+                            customerManager.displayCustomersData(false);
                             System.out.print("Enter the CustomerID to Search :\t");
                             String customerID = read1.nextLine();
                             System.out.println();
-                            c1.customerManager.searchUser(customerID);
+                            customerManager.searchUser(customerID);
                         } else if (desiredOption == 3) {
                             /*
                              * If 3 is entered by the user, then call the update method of the Customer
@@ -127,11 +127,12 @@ public class User {
                              * arguments.....
                              */
 
-                            c1.customerManager.displayCustomersData(false);
+                            customerManager.displayCustomersData(false);
                             System.out.print("Enter the CustomerID to Update its Data :\t");
                             String customerID = read1.nextLine();
                             if (customersCollection.size() > 0) {
-                                c1.customerManager.editUserInfo(customerID);
+                                List<String> details = readCustomerInfo();
+                                customerManager.editUserInfo(customerID);
                             } else {
                                 System.out.printf("%-50sNo Customer with the ID %s Found...!!!\n", " ", customerID);
                             }
@@ -141,19 +142,19 @@ public class User {
                              * If 4 is entered, then ask the user to enter the customer id, and then delete
                              * that customer....
                              */
-                            c1.customerManager.displayCustomersData(false);
+                            customerManager.displayCustomersData(false);
                             System.out.print("Enter the CustomerID to Delete its Data :\t");
                             String customerID = read1.nextLine();
                             if (customersCollection.size() > 0) {
-                                c1.customerManager.deleteUser(customerID);
+                                customerManager.deleteUser(customerID);
                             } else {
                                 System.out.printf("%-50sNo Customer with the ID %s Found...!!!\n", " ", customerID);
                             }
                         } else if (desiredOption == 5) {
                             /* Call the Display Method of Customer Class.... */
-                            c1.customerManager.displayCustomersData(false);
+                            customerManager.displayCustomersData(false);
                         } else if (desiredOption == 6) {
-                            c1.customerManager.displayCustomersData(false);
+                            customerManager.displayCustomersData(false);
                             System.out.print(
                                     "\n\nEnter the ID of the user to display all flights registered by that user...");
                             String id = read1.nextLine();
@@ -256,14 +257,14 @@ public class User {
                             }
                             bookingAndReserving.bookFlight(flightToBeBooked, numOfTickets, result[1]);
                         } else if (desiredChoice == 2) {
-
-                            c1.customerManager.editUserInfo(result[1]);
+                            List<String> details = readCustomerInfo();
+                            customerManager.editUserInfo(result[1]);
                         } else if (desiredChoice == 3) {
                             System.out.print(
                                     "Are you sure to delete your account...It's an irreversible action...Enter Y/y to confirm...");
                             char confirmationChar = read1.nextLine().charAt(0);
                             if (confirmationChar == 'Y' || confirmationChar == 'y') {
-                                c1.customerManager.deleteUser(result[1]);
+                                customerManager.deleteUser(result[1]);
                                 System.out.printf("User %s's account deleted Successfully...!!!", userName);
                                 desiredChoice = 0;
                             } else {
@@ -296,7 +297,7 @@ public class User {
                 }
             } else if (desiredOption == 4) {
                 Customer customer = readCustomerData();
-                c1.customerManager.addNewCustomer(customer);
+                customerManager.addNewCustomer(customer);
             } else if (desiredOption == 5) {
                 manualInstructions();
             }
@@ -385,15 +386,15 @@ public class User {
     public static List<Customer> getCustomersCollection() {
         return customersCollection;
     }
-
-    public static Customer readCustomerScannerInfo(){
+    public static Customer readCustomerData()
+    {
         System.out.printf("\n\n\n%60s ++++++++++++++ Welcome to the Customer Registration Portal ++++++++++++++", "");
         Scanner read = new Scanner(System.in);
         System.out.print("\nEnter your name :\t");
         String name = read.nextLine();
         System.out.print("Enter your email address :\t");
         String email = read.nextLine();
-        while (customerManager.isUniqueData(email)) {
+        while (isUniqueData(email)) {
             System.out.println(
                     "ERROR!!! User with the same email already exists... Use new email or login using the previous credentials....");
             System.out.print("Enter your email address :\t");
@@ -409,10 +410,37 @@ public class User {
         int age = read.nextInt();
         return new Customer(name, email, password, phone, address, age);
     }
-    private static Customer readCustomerData(){
-        Customer customer= readCustomerScannerInfo();
-        return customer;
+    public static boolean isUniqueData(String emailID) {
+        boolean isUnique = false;
+        for (Customer c : customersCollection) {
+            if (emailID.equals(c.getEmail())) {
+                isUnique = true;
+                break;
+            }
+        }
+        return isUnique;
+    }
+    public static List<String> readCustomerInfo() {
+        Scanner read = new Scanner(System.in);
+        List<String> details = new ArrayList<>();
 
+        System.out.print("\nEnter the new name of the Passenger:\t");
+        details.add(read.nextLine());
+
+        System.out.print("Enter the new email address:\t");
+        details.add(read.nextLine());
+
+        System.out.print("Enter the new Phone number:\t");
+        details.add(read.nextLine());
+
+        System.out.print("Enter the new address:\t");
+        details.add(read.nextLine());
+
+        System.out.print("Enter the new age:\t");
+        details.add(String.valueOf(read.nextInt()));
+
+        read.nextLine(); // Consume leftover newline
+        return details;
     }
 
     public static void displayMeasurementInstructions(){
