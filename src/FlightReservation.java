@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class FlightReservation implements DisplayClass {
+    CustomerManager customerManager = new CustomerManager();
 
     //        ************************************************************ Fields ************************************************************
     Flight flight = new Flight();
@@ -32,14 +33,14 @@ public class FlightReservation implements DisplayClass {
         boolean isFound = false;
         for (Flight f1 : flight.getFlightList()) {
             if (flightNo.equalsIgnoreCase(f1.getFlightNumber())) {
-                for (Customer customer : Customer.customerCollection) {
+                for (Customer customer : CustomerManager.customerCollection) {
                     if (userID.equals(customer.getUserID())) {
                         isFound = true;
                         f1.setNoOfSeatsInTheFlight(f1.getNoOfSeats() - numOfTickets);
                         if (!f1.isCustomerAlreadyAdded(f1.getListOfRegisteredCustomersInAFlight(), customer)) {
                             f1.addNewCustomerToFlight(customer);
                         }
-                        if (isFlightAlreadyAddedToCustomerList(customer.flightsRegisteredByUser, f1)) {
+                        if (isFlightAlreadyAddedToCustomerList(customerManager.flightsRegisteredByUser, f1)) {
                             addNumberOfTicketsToAlreadyBookedFlight(customer, numOfTickets);
                             if (flightIndex(flight.getFlightList(), flight) != -1) {
                                 customer.addExistingFlightToCustomerList(flightIndex(flight.getFlightList(), flight), numOfTickets);
@@ -71,7 +72,7 @@ public class FlightReservation implements DisplayClass {
         Scanner read = new Scanner(System.in);
         int index = 0, ticketsToBeReturned;
         boolean isFound = false;
-        for (Customer customer : Customer.customerCollection) {
+        for (Customer customer : CustomerManager.customerCollection) {
             if (userID.equals(customer.getUserID())) {
                 if (customer.getFlightsRegisteredByUser().size() != 0) {
                     System.out.printf("%50s %s Here is the list of all the Flights registered by you %s", " ", "++++++++++++++", "++++++++++++++");
@@ -92,11 +93,11 @@ public class FlightReservation implements DisplayClass {
                             }
                             if (numOfTicketsForFlight == numOfTickets) {
                                 ticketsToBeReturned = flight.getNoOfSeats() + numOfTicketsForFlight;
-                                customer.numOfTicketsBookedByUser.remove(index);
+                                customerManager.numOfTicketsBookedByUser.remove(index);
                                 flightIterator.remove();
                             } else {
                                 ticketsToBeReturned = numOfTickets + flight.getNoOfSeats();
-                                customer.numOfTicketsBookedByUser.set(index, (numOfTicketsForFlight - numOfTickets));
+                                customerManager.numOfTicketsBookedByUser.set(index, (numOfTicketsForFlight - numOfTickets));
                             }
                             flight.setNoOfSeatsInTheFlight(ticketsToBeReturned);
                             break;
@@ -116,12 +117,12 @@ public class FlightReservation implements DisplayClass {
     }
 
     void addNumberOfTicketsToAlreadyBookedFlight(Customer customer, int numOfTickets) {
-        int newNumOfTickets = customer.numOfTicketsBookedByUser.get(flightIndexInFlightList) + numOfTickets;
-        customer.numOfTicketsBookedByUser.set(flightIndexInFlightList, newNumOfTickets);
+        int newNumOfTickets = customerManager.numOfTicketsBookedByUser.get(flightIndexInFlightList) + numOfTickets;
+        customerManager.numOfTicketsBookedByUser.set(flightIndexInFlightList, newNumOfTickets);
     }
 
     void addNumberOfTicketsForNewFlight(Customer customer, int numOfTickets) {
-        customer.numOfTicketsBookedByUser.add(numOfTickets);
+        customerManager.numOfTicketsBookedByUser.add(numOfTickets);
     }
 
     boolean isFlightAlreadyAddedToCustomerList(List<Flight> flightList, Flight flight) {
