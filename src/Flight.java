@@ -18,10 +18,7 @@ public class Flight extends FlightDistance {
     private double distanceInKm;
     private String flightTime;
     private int numOfSeatsInTheFlight;
-    private List<Customer> listOfRegisteredCustomersInAFlight;
-    private int customerIndex;
-    private static int nextFlightDay = 0;
-    private static final List<Flight> flightList = new ArrayList<>();
+
 
     //        ************************************************************ Behaviours/Methods ************************************************************
 
@@ -53,7 +50,6 @@ public class Flight extends FlightDistance {
         this.distanceInMiles = Double.parseDouble(distanceBetweenTheCities[0]);
         this.distanceInKm = Double.parseDouble(distanceBetweenTheCities[1]);
         this.flightTime = calculateFlightTime(distanceInMiles);
-        this.listOfRegisteredCustomersInAFlight = new ArrayList<>();
         this.gate = gate;
     }
 
@@ -80,9 +76,7 @@ public class Flight extends FlightDistance {
      *
      * @param customer customer to be registered
      */
-    void addNewCustomerToFlight(Customer customer) {
-        this.listOfRegisteredCustomersInAFlight.add(customer);
-    }
+   
 
     /**
      * Adds numOfTickets to existing customer's tickets for the this flight.
