@@ -1,6 +1,8 @@
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 public class FlightManager {
     Flight flight;
@@ -77,12 +79,25 @@ public class FlightManager {
         for (int i = 0; i < numOfFlights; i++) {
             String[][] chosenDestinations = r1.randomDestinations();
             String[] distanceBetweenTheCities = flight.calculateDistance(Double.parseDouble(chosenDestinations[0][1]), Double.parseDouble(chosenDestinations[0][2]), Double.parseDouble(chosenDestinations[1][1]), Double.parseDouble(chosenDestinations[1][2]));
-            String flightSchedule = flight.createNewFlightsAndTime();
+            String flightSchedule = createNewFlightsAndTime();
             String flightNumber = r1.randomFlightNumbGen(2, 1).toUpperCase();
             int numOfSeatsInTheFlight = r1.randomNumOfSeats();
             String gate = r1.randomFlightNumbGen(1, 30);
             getFlightList().add(new Flight(flightSchedule, flightNumber, numOfSeatsInTheFlight, chosenDestinations, distanceBetweenTheCities, gate.toUpperCase()));
         }
+    }
+    public String createNewFlightsAndTime() {
+
+        Calendar c = Calendar.getInstance();
+        // Incrementing nextFlightDay, so that next scheduled flight would be in the future, not in the present
+        nextFlightDay += Math.random() * 7;
+        c.add(Calendar.DATE, nextFlightDay);
+        c.add(Calendar.HOUR, nextFlightDay);
+        c.set(Calendar.MINUTE, ((c.get(Calendar.MINUTE) * 3) - (int) (Math.random() * 45)));
+        Date myDateObj = c.getTime();
+        LocalDateTime date = Instant.ofEpochMilli(myDateObj.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        date = getNearestHourQuarter(date);
+        return date.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy, HH:mm a "));
     }
 
 

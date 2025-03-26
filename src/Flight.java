@@ -190,19 +190,7 @@ FlightManager flightManager;
      *
      * @return newly created flight schedule
      */
-    public String createNewFlightsAndTime() {
 
-        Calendar c = Calendar.getInstance();
-        // Incrementing nextFlightDay, so that next scheduled flight would be in the future, not in the present
-       nextFlightDay += Math.random() * 7;
-        c.add(Calendar.DATE, nextFlightDay);
-        c.add(Calendar.HOUR, nextFlightDay);
-        c.set(Calendar.MINUTE, ((c.get(Calendar.MINUTE) * 3) - (int) (Math.random() * 45)));
-        Date myDateObj = c.getTime();
-        LocalDateTime date = Instant.ofEpochMilli(myDateObj.getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        date = getNearestHourQuarter(date);
-        return date.format(DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy, HH:mm a "));
-    }
 
     /**
      * Formats flight schedule, so that the minutes would be to the nearest quarter.

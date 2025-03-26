@@ -29,10 +29,10 @@ public class User {
     public static void main(String[] args) {
         int countNumOfUsers = 1;
         RolesAndPermissions r1 = new RolesAndPermissions();
-        Flight f1 = new Flight();
+        FlightManager f1 = new FlightManager();
         FlightReservation bookingAndReserving = new FlightReservation();
         Customer c1 = new Customer();
-        f1.flightManager.flightScheduler();
+        f1.flightScheduler();
         Scanner read = new Scanner(System.in);
 
 
@@ -167,7 +167,7 @@ public class User {
                             if ('y' == choice || 'Y' == choice) {
                                 bookingAndReserving.displayRegisteredUsersForAllFlight();
                             } else if ('n' == choice || 'N' == choice) {
-                                f1.flightManager.displayFlightSchedule();
+                                f1.displayFlightSchedule();
                                 System.out.print(
                                         "Enter the Flight Number to display the list of passengers registered in that flight... ");
                                 String flightNum = read1.nextLine();
@@ -176,10 +176,10 @@ public class User {
                                 System.out.println("Invalid Choice...No Response...!");
                             }
                         } else if (desiredOption == 8) {
-                            f1.flightManager.displayFlightSchedule();
+                            f1.displayFlightSchedule();
                             System.out.print("Enter the Flight Number to delete the flight : ");
                             String flightNum = read1.nextLine();
-                            f1.flightManager.deleteFlight(flightNum);
+                            f1.deleteFlight(flightNum);
 
                         } else if (desiredOption == 0) {
                             ;
@@ -244,7 +244,7 @@ public class User {
                         desiredChoice = read.nextInt();
                         if (desiredChoice == 1) {
                             // bookingAndReserving.displayArtWork(1);
-                            f1.flightManager.displayFlightSchedule();
+                            f1.displayFlightSchedule();
                             System.out.print("\nEnter the desired flight number to book :\t ");
                             String flightToBeBooked = read1.nextLine();
                             System.out.print("Enter the Number of tickets for " + flightToBeBooked + " flight :   ");
@@ -271,8 +271,8 @@ public class User {
                             }
                         } else if (desiredChoice == 4) {
 
-                            f1.flightManager.displayFlightSchedule();
-                            f1.displayMeasurementInstructions();
+                            f1.displayFlightSchedule();
+                            displayMeasurementInstructions();
                         } else if (desiredChoice == 5) {
 
                             bookingAndReserving.cancelFlight(result[1]);
@@ -413,5 +413,16 @@ public class User {
         Customer customer= readCustomerScannerInfo();
         return customer;
 
+    }
+
+    public static void displayMeasurementInstructions(){
+        String symbols = "+---------------------------+";
+        System.out.printf("\n\n %100s\n %100s", symbols, "| SOME IMPORTANT GUIDELINES |");
+        System.out.printf("\n %100s\n", symbols);
+        System.out.println("\n\t\t1. Distance between the destinations are based upon the Airports Coordinates(Latitudes && Longitudes) based in those cities\n");
+        System.out.println("\t\t2. Actual Distance of the flight may vary from this approximation as Airlines may define their on Travel Policy that may restrict the planes to fly through specific regions...\n");
+        System.out.println("\t\t3. Flight Time depends upon several factors such as Ground Speed(GS), AirCraft Design, Flight Altitude and Weather. Ground Speed for these calculations is 450 Knots...\n");
+        System.out.println("\t\t4. Expect reaching your destination early or late from the Arrival Time. So, please keep a margin of ±1 hour...\n");
+        System.out.println("\t\t5. The departure time is the moment that your plane pushes back from the gate, not the time it takes off. The arrival time is the moment that your plane pulls into the gate, not the time\n\t\t   it touches down on the runway...\n");
     }
 }
