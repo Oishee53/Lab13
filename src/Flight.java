@@ -8,7 +8,7 @@ import java.util.*;
 public class Flight extends FlightDistance {
 
     //        ************************************************************ Fields ************************************************************
-
+FlightManager flightManager;
     private final String flightSchedule;
     private final String flightNumber;
     private final String fromWhichCity;
@@ -18,6 +18,7 @@ public class Flight extends FlightDistance {
     private double distanceInKm;
     private String flightTime;
     private int numOfSeatsInTheFlight;
+    private static int nextFlightDay = 0;
 
 
     //        ************************************************************ Behaviours/Methods ************************************************************
@@ -57,20 +58,7 @@ public class Flight extends FlightDistance {
      * Creates Flight Schedule. All methods of this class are collaborating with each other
      * to create flight schedule of the said length in this method.
      */
-    public void flightScheduler() {
-        int numOfFlights = 15;              // decides how many unique flights to be included/display in scheduler
-        RandomGenerator r1 = new RandomGenerator();
-        for (int i = 0; i < numOfFlights; i++) {
-            String[][] chosenDestinations = r1.randomDestinations();
-            String[] distanceBetweenTheCities = calculateDistance(Double.parseDouble(chosenDestinations[0][1]), Double.parseDouble(chosenDestinations[0][2]), Double.parseDouble(chosenDestinations[1][1]), Double.parseDouble(chosenDestinations[1][2]));
-            String flightSchedule = createNewFlightsAndTime();
-            String flightNumber = r1.randomFlightNumbGen(2, 1).toUpperCase();
-            int numOfSeatsInTheFlight = r1.randomNumOfSeats();
-            String gate = r1.randomFlightNumbGen(1, 30);
-            flightList.add(new Flight(flightSchedule, flightNumber, numOfSeatsInTheFlight, chosenDestinations, distanceBetweenTheCities, gate.toUpperCase()));
-        }
-    }
-
+  
     /**
      * Registers new Customer in this Flight.
      *
@@ -85,7 +73,7 @@ public class Flight extends FlightDistance {
      * @param numOfTickets number of tickets to add
      */
     void addTicketsToExistingCustomer(Customer customer, int numOfTickets) {
-        customer.addExistingFlightToCustomerList(customerIndex, numOfTickets);
+        customer.addExistingFlightToCustomerList(flightManager.customerIndex, numOfTickets);
     }
 
     /***
@@ -94,17 +82,7 @@ public class Flight extends FlightDistance {
      * @param customer specified customer to be checked
      * @return true if the customer is already registered in the said flight, false otherwise
      */
-    boolean isCustomerAlreadyAdded(List<Customer> customersList, Customer customer) {
-        boolean isAdded = false;
-        for (Customer customer1 : customersList) {
-            if (customer1.getUserID().equals(customer.getUserID())) {
-                isAdded = true;
-                customerIndex = customersList.indexOf(customer1);
-                break;
-            }
-        }
-        return isAdded;
-    }
+  
 
     /**
      * Calculates the flight time, using avg. ground speed of 450 knots.
@@ -112,6 +90,57 @@ public class Flight extends FlightDistance {
      * @param distanceBetweenTheCities distance between the cities/airports in miles
      * @return formatted flight time
      */
+   
+    /**
+     * Creates flight arrival time by adding flight time to flight departure time
+     *
+     * @return flight arrival time
+     */
+    public String fetchArrivalTime() {
+        /*These lines convert the String of flightSchedule to LocalDateTIme and add the arrivalTime to it....*/
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy, HH:mm a ");
+        LocalDateTime departureDateTime = LocalDateTime.parse(flightSchedule, formatter);
+
+        /*Getting the Flight Time, plane was in air*/
+        String[] flightTime = getFlightTime().split(":");
+        int hours = Integer.parseInt(flightTime[0]);
+        int minutes = Integer.parseInt(flightTime[1]);
+
+
+        LocalDateTime arrivalTime;
+
+        arrivalTime = departureDateTime.plusHours(hours).plusMinutes(minutes);
+        DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("EE, dd-MM-yyyy HH:mm a");
+        return arrivalTime.format(formatter1);
+
+    }
+
+  
+    /**
+     * Calculates the distance between the cities/airports based on their lat longs.
+     *
+     * @param lat1 origin city/airport latitude
+     * @param lon1 origin city/airport longitude
+     * @param lat2 destination city/airport latitude
+     * @param lon2 destination city/airport longitude
+     * @return distance both in miles and km between the cities/airports
+     */
+    @Override
+    public String[] calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double distance = Math.sin(degreeToRadian(lat1)) * Math.sin(degreeToRadian(lat2)) + Math.cos(degreeToRadian(lat1)) * Math.cos(degreeToRadian(lat2)) * Math.cos(degreeToRadian(theta));
+        distance = Math.acos(distance);
+        distance = radianToDegree(distance);
+        distance = distance * 60 * 1.1515;
+        /* On the Zero-Index, distance will be in Miles, on 1st-index, distance will be in KM and on the 2nd index distance will be in KNOTS*/
+        String[] distanceString = new String[3];
+        distanceString[0] = String.format("%.2f", distance * 0.8684);
+        distanceString[1] = String.format("%.2f", distance * 1.609344);
+        distanceString[2] = Double.toString(Math.round(distance * 100.0) / 100.0);
+        return distanceString;
+    }
+
+
     public String calculateFlightTime(double distanceBetweenTheCities) {
         double groundSpeed = 450;
         double time = (distanceBetweenTheCities / groundSpeed);
@@ -141,72 +170,6 @@ public class Flight extends FlightDistance {
         }
     }
 
-    /**
-     * Creates flight arrival time by adding flight time to flight departure time
-     *
-     * @return flight arrival time
-     */
-    public String fetchArrivalTime() {
-        /*These lines convert the String of flightSchedule to LocalDateTIme and add the arrivalTime to it....*/
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy, HH:mm a ");
-        LocalDateTime departureDateTime = LocalDateTime.parse(flightSchedule, formatter);
-
-        /*Getting the Flight Time, plane was in air*/
-        String[] flightTime = getFlightTime().split(":");
-        int hours = Integer.parseInt(flightTime[0]);
-        int minutes = Integer.parseInt(flightTime[1]);
-
-
-        LocalDateTime arrivalTime;
-
-        arrivalTime = departureDateTime.plusHours(hours).plusMinutes(minutes);
-        DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("EE, dd-MM-yyyy HH:mm a");
-        return arrivalTime.format(formatter1);
-
-    }
-
-    void deleteFlight(String flightNumber) {
-        boolean isFound = false;
-        Iterator<Flight> list = flightList.iterator();
-        while (list.hasNext()) {
-            Flight flight = list.next();
-            if (flight.getFlightNumber().equalsIgnoreCase(flightNumber)) {
-                isFound = true;
-                break;
-            }
-        }
-        if (isFound) {
-            list.remove();
-        } else {
-            System.out.println("Flight with given Number not found...");
-        }
-        displayFlightSchedule();
-    }
-
-    /**
-     * Calculates the distance between the cities/airports based on their lat longs.
-     *
-     * @param lat1 origin city/airport latitude
-     * @param lon1 origin city/airport longitude
-     * @param lat2 destination city/airport latitude
-     * @param lon2 destination city/airport longitude
-     * @return distance both in miles and km between the cities/airports
-     */
-    @Override
-    public String[] calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        double theta = lon1 - lon2;
-        double distance = Math.sin(degreeToRadian(lat1)) * Math.sin(degreeToRadian(lat2)) + Math.cos(degreeToRadian(lat1)) * Math.cos(degreeToRadian(lat2)) * Math.cos(degreeToRadian(theta));
-        distance = Math.acos(distance);
-        distance = radianToDegree(distance);
-        distance = distance * 60 * 1.1515;
-        /* On the Zero-Index, distance will be in Miles, on 1st-index, distance will be in KM and on the 2nd index distance will be in KNOTS*/
-        String[] distanceString = new String[3];
-        distanceString[0] = String.format("%.2f", distance * 0.8684);
-        distanceString[1] = String.format("%.2f", distance * 1.609344);
-        distanceString[2] = Double.toString(Math.round(distance * 100.0) / 100.0);
-        return distanceString;
-    }
-
     private double degreeToRadian(double deg) {
         return (deg * Math.PI / 180.0);
     }
@@ -215,21 +178,7 @@ public class Flight extends FlightDistance {
         return (rad * 180.0 / Math.PI);
     }
 
-    public void displayFlightSchedule() {
-
-        Iterator<Flight> flightIterator = flightList.iterator();
-        System.out.println();
-        System.out.print("+------+-------------------------------------------+-----------+------------------+-----------------------+------------------------+---------------------------+-------------+--------+------------------------+\n");
-        System.out.printf("| Num  | FLIGHT SCHEDULE\t\t\t   | FLIGHT NO | Available Seats  | \tFROM ====>>       | \t====>> TO\t   | \t    ARRIVAL TIME       | FLIGHT TIME |  GATE  |   DISTANCE(MILES/KMS)  |%n");
-        System.out.print("+------+-------------------------------------------+-----------+------------------+-----------------------+------------------------+---------------------------+-------------+--------+------------------------+\n");
-        int i = 0;
-        while (flightIterator.hasNext()) {
-            i++;
-            Flight f1 = flightIterator.next();
-            System.out.println(f1.toString(i));
-            System.out.print("+------+-------------------------------------------+-----------+------------------+-----------------------+------------------------+---------------------------+-------------+--------+------------------------+\n");
-        }
-    }
+   
 
     @Override
     public String toString(int i) {
@@ -245,7 +194,7 @@ public class Flight extends FlightDistance {
 
         Calendar c = Calendar.getInstance();
         // Incrementing nextFlightDay, so that next scheduled flight would be in the future, not in the present
-        nextFlightDay += Math.random() * 7;
+       nextFlightDay += Math.random() * 7;
         c.add(Calendar.DATE, nextFlightDay);
         c.add(Calendar.HOUR, nextFlightDay);
         c.set(Calendar.MINUTE, ((c.get(Calendar.MINUTE) * 3) - (int) (Math.random() * 45)));
@@ -293,14 +242,7 @@ public class Flight extends FlightDistance {
         return flightTime;
     }
 
-    public List<Flight> getFlightList() {
-        return flightList;
-    }
-
-    public List<Customer> getListOfRegisteredCustomersInAFlight() {
-        return listOfRegisteredCustomersInAFlight;
-    }
-
+   
     public String getFlightSchedule() {
         return flightSchedule;
     }

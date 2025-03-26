@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 public class User {
     static CustomerManager customerManager;
+    FlightManager flightManager;
 
     // ************************************************************ Fields
     // ************************************************************
@@ -31,7 +32,7 @@ public class User {
         Flight f1 = new Flight();
         FlightReservation bookingAndReserving = new FlightReservation();
         Customer c1 = new Customer();
-        f1.flightScheduler();
+        f1.flightManager.flightScheduler();
         Scanner read = new Scanner(System.in);
 
 
@@ -166,7 +167,7 @@ public class User {
                             if ('y' == choice || 'Y' == choice) {
                                 bookingAndReserving.displayRegisteredUsersForAllFlight();
                             } else if ('n' == choice || 'N' == choice) {
-                                f1.displayFlightSchedule();
+                                f1.flightManager.displayFlightSchedule();
                                 System.out.print(
                                         "Enter the Flight Number to display the list of passengers registered in that flight... ");
                                 String flightNum = read1.nextLine();
@@ -175,10 +176,10 @@ public class User {
                                 System.out.println("Invalid Choice...No Response...!");
                             }
                         } else if (desiredOption == 8) {
-                            f1.displayFlightSchedule();
+                            f1.flightManager.displayFlightSchedule();
                             System.out.print("Enter the Flight Number to delete the flight : ");
                             String flightNum = read1.nextLine();
-                            f1.deleteFlight(flightNum);
+                            f1.flightManager.deleteFlight(flightNum);
 
                         } else if (desiredOption == 0) {
                             ;
@@ -243,7 +244,7 @@ public class User {
                         desiredChoice = read.nextInt();
                         if (desiredChoice == 1) {
                             // bookingAndReserving.displayArtWork(1);
-                            f1.displayFlightSchedule();
+                            f1.flightManager.displayFlightSchedule();
                             System.out.print("\nEnter the desired flight number to book :\t ");
                             String flightToBeBooked = read1.nextLine();
                             System.out.print("Enter the Number of tickets for " + flightToBeBooked + " flight :   ");
@@ -270,7 +271,7 @@ public class User {
                             }
                         } else if (desiredChoice == 4) {
 
-                            f1.displayFlightSchedule();
+                            f1.flightManager.displayFlightSchedule();
                             f1.displayMeasurementInstructions();
                         } else if (desiredChoice == 5) {
 
